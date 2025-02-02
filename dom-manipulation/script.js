@@ -120,31 +120,34 @@ function filterQuotes() {
   showRandomQuote(selectedCategory);
 }
 
-function fetchQuotesFromServer() {
-  return fetch(API_URL) 
-    .then(response => response.json())
-    .then(serverData => serverData.map(serverItem => ({ 
+async function fetchQuotesFromServer() { 
+  try {
+    const response = await fetch(API_URL);
+    const serverData = await response.json(); 
+    return serverData.map(serverItem => ({ 
       text: serverItem.title, 
       author: 'Server', 
       category: 'Server' 
-    }))); 
+    })); 
+  } catch (error) {
+    console.error('Error fetching quotes from server:', error);
+    return []; // Return an empty array on error
+  }
 }
 
-function syncData() {
-  fetchQuotesFromServer()
-    .then(serverQuotes => {
-      // Merge local and server quotes (basic example)
-      quotes = [...new Set([...quotes, ...serverQuotes])]; // Merge and remove duplicates
-      saveQuotes();
-      populateCategories();
-      showRandomQuote(categoryFilter.value); 
+async function syncData() { 
+  try {
+    const serverQuotes = await fetchQuotesFromServer(); 
+    quotes = [...new Set([...quotes, ...serverQuotes])]; 
+    saveQuotes();
+    populateCategories();
+    showRandomQuote(categoryFilter.value); 
 
-      alert('Data synced successfully from server.');
-    })
-    .catch(error => {
-      console.error('Error syncing data:', error);
-      alert('Failed to sync data from server.');
-    });
+    alert('Data synced successfully from server.');
+  } catch (error) {
+    console.error('Error syncing data:', error);
+    alert('Failed to sync data from server.');
+  }
 }
 
 syncButton.addEventListener('click', syncData); 
@@ -164,4 +167,4 @@ if (lastViewedQuote) {
   showRandomQuote(categoryFilter.value); 
 }
 
-importFile.addEventListener('change', importFromJsonFile);
+importFile.addEventListener('change', importFromJsonFile); 
