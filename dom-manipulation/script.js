@@ -1,7 +1,6 @@
 const STORAGE_KEY = 'quotes';
 const LAST_FILTER_KEY = 'lastCategoryFilter';
-const API_URL = 'https://jsonplaceholder.typicode.com/posts'; 
-
+const API_URL = 'https://jsonplaceholder.typicode.com/posts';
 
 let quotes = loadQuotesFromLocalStorage(); 
 const quoteDisplay = document.getElementById('quoteDisplay');
@@ -173,7 +172,7 @@ async function syncQuotes() {
     populateCategories();
     showRandomQuote(categoryFilter.value); 
 
-    alert('Data synced successfully from server.');
+    alert('Quotes synced with server!'); 
   } catch (error) {
     console.error('Error syncing data:', error);
     alert('Failed to sync data from server.');
