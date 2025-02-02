@@ -1,11 +1,12 @@
 const STORAGE_KEY = 'quotes';
 const LAST_FILTER_KEY = 'lastCategoryFilter';
-
-const quotes = loadQuotesFromLocalStorage(); 
+const API_URL = 'https://jsonplaceholder.typicode.com/posts'; // Example API endpoint
+  let quotes = loadQuotesFromLocalStorage(); 
 const quoteDisplay = document.getElementById('quoteDisplay');
 const newQuoteBtn = document.getElementById('newQuote');
 const categoryFilter = document.getElementById('categoryFilter');
 const importFile = document.getElementById('importFile');
+const syncButton = document.getElementById('syncButton'); // Add a button for manual sync
 
 function showRandomQuote(categoryFilter) {
   let filteredQuotes = quotes;
@@ -79,6 +80,39 @@ function filterQuotes() {
   localStorage.setItem(LAST_FILTER_KEY, selectedCategory); 
   showRandomQuote(selectedCategory);
 }
+// ... (other functions: createAddQuoteForm, addQuote, saveQuotes, 
+//       loadQuotesFromLocalStorage, exportQuotesToJson, importFromJsonFile, 
+//       populateCategories, filterQuotes)
+
+function syncData() {
+  fetch(API_URL) 
+    .then(response => response.json())
+    .then(serverQuotes => {
+      // Simple conflict resolution: Replace local quotes with server quotes
+      quotes = serverQuotes.map(serverQuote => ({ 
+        text: serverQuote.title, 
+        author: 'Server', 
+        category: 'Server' 
+      })); 
+
+      saveQuotes();
+      populateCategories();
+      showRandomQuote(categoryFilter.value); 
+
+      // Display a success message
+      alert('Data synced successfully from server.');
+    })
+    .catch(error => {
+      console.error('Error syncing data:', error);
+      alert('Failed to sync data from server.');
+    });
+}
+
+syncButton.addEventListener('click', syncData); // Add event listener for manual sync
+
+// Periodically check for updates (e.g., every 5 minutes)
+setInterval(syncData, 5 * 60 * 1000); // 5 minutes in milliseconds
+
 
 newQuoteBtn.addEventListener('click', showRandomQuote);
 categoryFilter.addEventListener('change', filterQuotes); 
