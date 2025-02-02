@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'quotes';
 const LAST_FILTER_KEY = 'lastCategoryFilter';
-const API_URL = 'YOUR_API_ENDPOINT_HERE'; // Replace with your actual API endpoint
+const API_URL = 'https://jsonplaceholder.typicode.com/posts'; // Example API endpoint
 
 let quotes = loadQuotesFromLocalStorage(); 
 const quoteDisplay = document.getElementById('quoteDisplay');
@@ -157,16 +157,14 @@ async function fetchQuotesFromServer() {
   }
 }
 
-async function syncQuotes() { 
+async function syncData() { 
   try {
     const serverQuotes = await fetchQuotesFromServer(); 
-
-    // Merge local and server quotes (basic example)
+    // More robust merge strategy:
     const mergedQuotes = serverQuotes.map(serverQuote => {
       const existingQuote = quotes.find(localQuote => localQuote.text === serverQuote.text);
       return existingQuote || serverQuote; 
     });
-
     quotes = mergedQuotes; 
     saveQuotes();
     populateCategories();
@@ -178,8 +176,6 @@ async function syncQuotes() {
     alert('Failed to sync data from server.');
   }
 }
-
-syncData(); // Initial sync on page load
 
 syncButton.addEventListener('click', syncData); 
 
