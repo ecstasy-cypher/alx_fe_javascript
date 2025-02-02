@@ -39,7 +39,7 @@ function createAddQuoteForm() {
   document.body.appendChild(formContainer);
 }
 
-function addQuote() {
+async function addQuote() {
   const newQuoteText = document.getElementById('newQuoteText').value;
   const newQuoteCategory = document.getElementById('newQuoteCategory').value;
 
@@ -50,10 +50,29 @@ function addQuote() {
       category: newQuoteCategory
     };
 
-    quotes.push(newQuote);
-    showRandomQuote(categoryFilter.value); 
-    saveQuotes(); 
-    populateCategories(); 
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST', 
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newQuote)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok (status: ${response.status})`);
+      }
+
+      quotes.push(newQuote); 
+      saveQuotes();
+      populateCategories();
+      showRandomQuote(categoryFilter.value);
+      alert('Quote added successfully!');
+
+    } catch (error) {
+      console.error('Error adding quote:', error);
+      alert('Failed to add quote.');
+    }
   }
 
   document.getElementById('newQuoteText').value = '';
@@ -123,6 +142,9 @@ function filterQuotes() {
 async function fetchQuotesFromServer() { 
   try {
     const response = await fetch(API_URL);
+    if (!response.ok) {
+      throw new Error(`Network response was not ok (status: ${response.status})`);
+    }
     const serverData = await response.json(); 
     return serverData.map(serverItem => ({ 
       text: serverItem.title, 
@@ -131,14 +153,19 @@ async function fetchQuotesFromServer() {
     })); 
   } catch (error) {
     console.error('Error fetching quotes from server:', error);
-    return []; // Return an empty array on error
+    return []; 
   }
 }
 
 async function syncData() { 
   try {
     const serverQuotes = await fetchQuotesFromServer(); 
-    quotes = [...new Set([...quotes, ...serverQuotes])]; 
+    // More robust merge strategy:
+    const mergedQuotes = serverQuotes.map(serverQuote => {
+      const existingQuote = quotes.find(localQuote => localQuote.text === serverQuote.text);
+      return existingQuote || serverQuote; 
+    });
+    quotes = mergedQuotes; 
     saveQuotes();
     populateCategories();
     showRandomQuote(categoryFilter.value); 
