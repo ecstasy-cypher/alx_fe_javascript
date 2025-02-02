@@ -1,6 +1,7 @@
 const STORAGE_KEY = 'quotes';
 const LAST_FILTER_KEY = 'lastCategoryFilter';
-const API_URL = 'YOUR_API_ENDPOINT_HERE'; // Replace with your actual API endpoint
+const API_URL = 'https://jsonplaceholder.typicode.com/posts'; 
+
 
 let quotes = loadQuotesFromLocalStorage(); 
 const quoteDisplay = document.getElementById('quoteDisplay');
